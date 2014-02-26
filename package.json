@@ -1,0 +1,24 @@
+{
+    "name": "nodeBomber",
+    "version": "0.0.1",
+    "description": "nodeBomber Project @ HSR-SE2P-2014",
+    "main": "app.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "express": "3.x"
+    },
+    "engines": {
+        "node": "0.10.x",
+        "npm": "1.3.x"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dauton/nodeBomber"
+    },
+    "keywords": [
+        "node"
+    ],
+    "author": "C. Honegger, F. Laib, D. Morina & S. Muggli"
+}
