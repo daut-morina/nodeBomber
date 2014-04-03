@@ -3,7 +3,7 @@ var assert = chai.assert;
 
 var http = require('http');
 
-var app = require('../app');
+require('../app');
 
 describe('Server', function() {
 
