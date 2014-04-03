@@ -4,7 +4,6 @@ var server = app.listen(process.env.PORT || 3000);
 var io = require('socket.io').listen(server);
 
 var routes = require('./routes');
-var db = require('./models');
 
 app.configure(function() {
     app.set('views', __dirname + '/views');
