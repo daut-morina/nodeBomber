@@ -4,11 +4,11 @@
   "description": "nodeBomber Project @ HSR-SE2P-2014",
   "main": "app.js",
   "scripts": {
-    "test": "mocha",
-      "blanket": {
-          "pattern": "test",
-          "data-cover-never": "node_modules"
-      }
+    "test": "mocha -R spec",
+    "blanket": {
+      "pattern": "test",
+      "data-cover-never": "node_modules"
+    }
   },
   "dependencies": {
     "express": "3.5.x",
