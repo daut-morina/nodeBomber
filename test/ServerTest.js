@@ -20,7 +20,7 @@ describe('Server', function() {
             assert.equal(200, response.statusCode, "Should return 200, returned " + response.statusCode + " instead.");
             response.setEncoding('utf8');
             response.on('data', function(body) {
-                assert.include(body, "Express", "wrong content");
+                assert.include(body, "Bomb", "wrong content");
             });
         }).on('error', function(error) {
             console.log("Got error: " + error.message);
@@ -32,7 +32,7 @@ describe('Server', function() {
             assert.equal(200, response.statusCode, "Should return 200, returned " + response.statusCode + " instead.");
             response.setEncoding('utf8');
             response.on('data', function(body) {
-                assert.include(body, "playground", "not returning html");
+                assert.include(body, "playerCanvas", "not returning html");
             });
         }).on('error', function(error) {
             console.log("Got error: " + error.message);

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/stylesheets/bootstrap.min.css" />
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+</head>
+<body>
+<canvas id="playerCanvas"></canvas>
+
+<script src="/javascripts/jquery-2.1.0.min.js"></script>
+<script src="/javascripts/bootstrap.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/javascripts/Player.js"></script>
+<script>
+    $(document).ready(function() {
+
+        var socket;
+        var localPlayer;
+        var remotePlayers;
+
+        var playerCanvas = document.getElementById("playerCanvas");
+        var playerContext = playerCanvas.getContext("2d");
+
+        playerCanvas.width = 480;
+        playerCanvas.height = 320;
+
+        playerContext.fillStyle = "#000000";
+
+        localPlayer = new Player(10, 10);
+
+        remotePlayers = [];
+
+        socket = io.connect(window.location.hostname);
+
+        var findPlayerById = function(id) {
+            for (var i = 0; i < remotePlayers.length; ++i) {
+                if (id == remotePlayers[i].getId()) {
+                    return remotePlayers[i];
+                }
+            }
+
+            return false;
+        };
+
+        var setEventHandlers = function() {
+            //@TODO: Use constants for player width (-10) and speed (+/- 5)
+            window.onkeydown = function(e) {
+                var key = e.keyCode ? e.keyCode : e.which;
+
+                switch(key) {
+                    case 37:
+                        if (!(0 > localPlayer.getX() - 5)) {
+                            localPlayer.setX(localPlayer.getX() - 5);
+                        }
+                        break;
+                    case 38:
+                        if (!(0 > localPlayer.getY() - 5)) {
+                            localPlayer.setY(localPlayer.getY() - 5);
+                        }
+                        break;
+                    case 39:
+                        if (!(playerCanvas.width - 10 < localPlayer.getX() + 5)) {
+                            localPlayer.setX(localPlayer.getX() + 5);
+                        }
+                        break;
+                    case 40:
+                        if (!(playerCanvas.height - 10 < localPlayer.getY() + 5)) {
+                            localPlayer.setY(localPlayer.getY() + 5);
+                        }
+                        break;
+                }
+
+                socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+            };
+
+            socket.on("connect", function() {
+                socket.emit("new player", { x: localPlayer.getX(), y: localPlayer.getY() });
+            });
+
+            socket.on("disconnect", function(data) {
+                var removedPlayer = findPlayerById(data.id);
+
+                if (!removedPlayer) {
+                    return;
+                }
+
+                remotePlayers.splice(remotePlayers.indexOf(removedPlayer), 1);
+            });
+
+            socket.on("new player", function(data) {
+                var newPlayer = new Player(data.x, data.y);
+                newPlayer.setId(data.id);
+
+                remotePlayers.push(newPlayer);
+            });
+
+            socket.on("update player positions", function(data) {
+                var movedPlayer = findPlayerById(data.id);
+
+                if (!movedPlayer) {
+                    return;
+                };
+
+                movedPlayer.setX(data.x);
+                movedPlayer.setY(data.y);
+            });
+        };
+
+        setEventHandlers();
+
+        setInterval(function() {
+            playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
+            localPlayer.draw(playerContext);
+            for (var i = 0; i < remotePlayers.length; ++i) {
+                remotePlayers[i].draw(playerContext);
+            }
+        }, 1000 / 60);
+
+    });
+</script>
+</body>
+</html>

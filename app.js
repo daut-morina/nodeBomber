@@ -4,6 +4,7 @@ var server = app.listen(process.env.PORT || 3000);
 var io = require('socket.io').listen(server);
 
 var routes = require('./routes');
+var Player = require("./Player").Player;
 
 app.configure(function() {
     app.set('views', __dirname + '/views');
@@ -28,31 +29,77 @@ app.configure('production', function() {
 
 app.get('/', routes.index);
 
-app.get('/playground', function(req, res) {
-    res.send('This is going to be the playground');
-});
+app.get('/playground', routes.playground);
 
 /**************************************************
- ** SOCKETS
+ ** GAME
  **************************************************/
 
-io.sockets.on('connection', function (socket) {
-    console.log(io.transports[socket.id].name);
-    socket.emit('news', { hello: 'world'});
+var players;
 
+var getPlayerById = function(id) {
+    for (var i = 0; i < players.length; ++i) {
+        if (id == players[i].getId()) {
+            return players[i];
+        }
+    }
 
-    socket.on('my other event', function (data) {
-        console.log(data);
+    return false;
+};
+
+var init = function() {
+    players = [];
+
+    setEventHandlers();
+};
+
+var setEventHandlers = function() {
+    io.sockets.on("connection", onConnection);
+};
+
+var onConnection = function(socket) {
+    console.log("### New player has connected: " +  socket.id + " ###");
+
+    socket.on("disconnect", function() {
+        var removedPlayer = getPlayerById(socket.id);
+
+        if (!removedPlayer) {
+            return;
+        }
+
+        players.splice(players.indexOf(removedPlayer), 1);
+
+        this.broadcast.emit("disconnect", { id: removedPlayer.getId() });
     });
 
-    socket.on('bomb drop', function(data) {
-        console.log(data);
-        socket.broadcast.emit('draw bomb');
-    });
-});
+    socket.on("new player", function(data) {
+        var newPlayer = new Player(data.x, data.y);
+        newPlayer.setId(socket.id);
 
-/**************************************************
- ** EXPORT
- **************************************************/
+        socket.broadcast.emit("new player", { id: newPlayer.getId(), x: newPlayer.getX(), y: newPlayer.getY() });
+
+        for (var i = 0; i < players.length; ++i) {
+            existingPlayer = players[i];
+            socket.emit("new player", { id: existingPlayer.getId(), x: existingPlayer.getX(), y: existingPlayer.getY() });
+        }
+        players.push(newPlayer);
+
+    });
+
+    socket.on("update player positions", function(data) {
+        var movedPlayer = getPlayerById(socket.id);
+
+        if (!movedPlayer) {
+            return;
+        }
+
+        movedPlayer.setX(data.x);
+        movedPlayer.setY(data.y);
+
+        socket.broadcast.emit("update player positions", { id: movedPlayer.getId(), x: movedPlayer.getX(), y: movedPlayer.getY() });
+    });
+};
 
 exports = module.exports = app;
+
+init();

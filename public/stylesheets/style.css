@@ -6,3 +6,9 @@ body {
 a {
   color: #00B7FF;
 }
+
+canvas#playerCanvas {
+    width: 480px;
+    height: 320px;
+    border: 1px solid;
+}
