@@ -1,7 +1,8 @@
-var Player = function(initX, initY) {
+var Player = function(initX, initY, initColor) {
     var id;
     var x = initX;
     var y = initY;
+    var color = initColor;
 
     var setId = function(newId) {
         id = newId;
@@ -10,6 +11,10 @@ var Player = function(initX, initY) {
     var getId = function() {
         return id;
     };
+
+    var getColor = function() {
+        return color;
+    }
 
     var setX = function(newX) {
         x = newX;
@@ -34,6 +39,7 @@ var Player = function(initX, initY) {
     return {
         setId:  setId,
         getId:  getId,
+        getColor: getColor,
         setX:   setX,
         getX:   getX,
         setY:   setY,

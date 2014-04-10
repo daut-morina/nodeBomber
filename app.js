@@ -73,17 +73,17 @@ var onConnection = function(socket) {
     });
 
     socket.on("new player", function(data) {
-        var newPlayer = new Player(data.x, data.y);
+        var newPlayer = new Player(data.x, data.y, data.color);
         newPlayer.setId(socket.id);
 
-        socket.broadcast.emit("new player", { id: newPlayer.getId(), x: newPlayer.getX(), y: newPlayer.getY() });
+        socket.broadcast.emit("new player", { id: newPlayer.getId(), x: newPlayer.getX(), y: newPlayer.getY(), color: newPlayer.getColor() });
 
         for (var i = 0; i < players.length; ++i) {
             existingPlayer = players[i];
-            socket.emit("new player", { id: existingPlayer.getId(), x: existingPlayer.getX(), y: existingPlayer.getY() });
+            socket.emit("new player", { id: existingPlayer.getId(), x: existingPlayer.getX(), y: existingPlayer.getY(), color: existingPlayer.getColor() });
         }
-        players.push(newPlayer);
 
+        players.push(newPlayer);
     });
 
     socket.on("update player positions", function(data) {

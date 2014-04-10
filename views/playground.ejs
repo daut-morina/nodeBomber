@@ -18,6 +18,28 @@
 <script src="/javascripts/Player.js"></script>
 <script>
     $(document).ready(function() {
+        /*
+         ----- Helpers
+         */
+
+        var findPlayerById = function(id) {
+            for (var i = 0; i < remotePlayers.length; ++i) {
+                if (id == remotePlayers[i].getId()) {
+                    return remotePlayers[i];
+                }
+            }
+
+            return false;
+        };
+
+        var getRandomColor = function() {
+            var letters = '0123456789ABCDEF'.split('');
+            var color = '#';
+            for (var i = 0; i < 6; i++ ) {
+                color += letters[Math.round(Math.random() * 15)];
+            }
+            return color;
+        };
 
         var socket;
         var localPlayer;
@@ -29,23 +51,11 @@
         playerCanvas.width = 480;
         playerCanvas.height = 320;
 
-        playerContext.fillStyle = "#000000";
-
-        localPlayer = new Player(10, 10);
+        localPlayer = new Player(10, 10, getRandomColor());
 
         remotePlayers = [];
 
         socket = io.connect(window.location.hostname);
-
-        var findPlayerById = function(id) {
-            for (var i = 0; i < remotePlayers.length; ++i) {
-                if (id == remotePlayers[i].getId()) {
-                    return remotePlayers[i];
-                }
-            }
-
-            return false;
-        };
 
         var setEventHandlers = function() {
             //@TODO: Use constants for player width (-10) and speed (+/- 5)
@@ -136,7 +146,7 @@
             };
 
             socket.on("connect", function() {
-                socket.emit("new player", { x: localPlayer.getX(), y: localPlayer.getY() });
+                socket.emit("new player", { x: localPlayer.getX(), y: localPlayer.getY(), color: localPlayer.getColor() });
             });
 
             socket.on("disconnect", function(data) {
@@ -150,7 +160,7 @@
             });
 
             socket.on("new player", function(data) {
-                var newPlayer = new Player(data.x, data.y);
+                var newPlayer = new Player(data.x, data.y, data.color);
                 newPlayer.setId(data.id);
 
                 remotePlayers.push(newPlayer);
@@ -172,10 +182,13 @@
 
         setInterval(function() {
             playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
+            playerContext.fillStyle = localPlayer.getColor();
             localPlayer.draw(playerContext);
             for (var i = 0; i < remotePlayers.length; ++i) {
+                playerContext.fillStyle = remotePlayers[i].getColor();
                 remotePlayers[i].draw(playerContext);
             }
+
         }, 1000 / 60);
 
     });
