@@ -7,6 +7,10 @@
 </head>
 <body>
 <canvas id="playerCanvas"></canvas>
+<button id="left" class="btn btn-default">left</button>
+<button id="up" class="btn btn-default">up</button>
+<button id="right" class="btn btn-default">right</button>
+<button id="down" class="btn btn-default">down</button>
 
 <script src="/javascripts/jquery-2.1.0.min.js"></script>
 <script src="/javascripts/bootstrap.min.js"></script>
@@ -45,6 +49,63 @@
 
         var setEventHandlers = function() {
             //@TODO: Use constants for player width (-10) and speed (+/- 5)
+            window.onkeydown = function(e) {
+                var key = e.keyCode ? e.keyCode : e.which;
+
+                switch(key) {
+                    case 37:
+                        if (!(0 > localPlayer.getX() - 5)) {
+                            localPlayer.setX(localPlayer.getX() - 5);
+                        }
+                        break;
+                    case 38:
+                        if (!(0 > localPlayer.getY() - 5)) {
+                            localPlayer.setY(localPlayer.getY() - 5);
+                        }
+                        break;
+                    case 39:
+                        if (!(playerCanvas.width - 10 < localPlayer.getX() + 5)) {
+                            localPlayer.setX(localPlayer.getX() + 5);
+                        }
+                        break;
+                    case 40:
+                        if (!(playerCanvas.height - 10 < localPlayer.getY() + 5)) {
+                            localPlayer.setY(localPlayer.getY() + 5);
+                        }
+                        break;
+                }
+
+                socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+            };
+
+            $("#left").mousedown(function() {
+                if (!(0 > localPlayer.getX() - 5)) {
+                    localPlayer.setX(localPlayer.getX() - 5);
+                }
+                socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+            });
+
+            $("#up").mousedown(function() {
+                if (!(0 > localPlayer.getY() - 5)) {
+                    localPlayer.setY(localPlayer.getY() - 5);
+                }
+                socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+            });
+
+            $("#right").mousedown(function() {
+                if (!(playerCanvas.width - 10 < localPlayer.getX() + 5)) {
+                    localPlayer.setX(localPlayer.getX() + 5);
+                }
+                socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+            });
+
+            $("#down").mousedown(function() {
+                if (!(playerCanvas.height - 10 < localPlayer.getY() + 5)) {
+                    localPlayer.setY(localPlayer.getY() + 5);
+                }
+                socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+            });
+
             window.onkeydown = function(e) {
                 var key = e.keyCode ? e.keyCode : e.which;
 
