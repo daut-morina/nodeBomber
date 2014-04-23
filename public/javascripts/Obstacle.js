@@ -1,4 +1,4 @@
-var Player = function(initX, initY) {
+var Obstacle = function(initX, initY) {
     var id;
     var x = initX;
     var y = initY;
@@ -27,18 +27,8 @@ var Player = function(initX, initY) {
         return y;
     };
 
-    //todo: 10 durch Breite, Höhe des Players ersetzen
-    var getAggregatedX = function() {
-        return (4 * x) + (2 * 10);
-    };
-
-    //todo: 10 durch Breite, Höhe des Players ersetzen
-    var getAggregatedY = function() {
-        return (4 * y) + (2 * 10);
-    };
-
     var draw = function(context) {
-        context.fillRect(x, y, 10, 10);
+        context.fillRect(x, y, 20, 20);
     };
 
     return {
@@ -48,8 +38,6 @@ var Player = function(initX, initY) {
         getX:   getX,
         setY:   setY,
         getY:   getY,
-        getAggregatedX: getAggregatedX,
-        getAggregatedY: getAggregatedY,
         draw:   draw
     };
 };
