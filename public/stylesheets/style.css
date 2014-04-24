@@ -7,8 +7,21 @@ a {
   color: #00B7FF;
 }
 
-canvas#playerCanvas {
+canvas {
+    position: absolute;
     width: 480px;
     height: 320px;
     border: 1px solid;
 }
+/*
+canvas#playerCanvas {
+    position: absolute;
+    width: 480px;
+    height: 320px;
+    border: 1px solid;
+}
+
+
+canvas#bombCanvas {
+    position: absolute;
+}*/

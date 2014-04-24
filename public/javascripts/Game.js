@@ -4,6 +4,7 @@ var controller;
 var socket;
 var localPlayer;
 var players;
+var bomb;
 
 var initGame = function() {
     playerCanvas = document.getElementById('playerCanvas');
@@ -14,6 +15,7 @@ var initGame = function() {
     socket = io.connect(window.location.hostname);
 
     localPlayer = new Player(socket.id, 50, 50);
+    bomb = new bomb(socket.id);
 
     players = [];
 

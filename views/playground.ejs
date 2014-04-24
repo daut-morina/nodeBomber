@@ -7,25 +7,35 @@
 </head>
 <body>
 <canvas id="playerCanvas"></canvas>
+<canvas id="bombCanvas"></canvas>
+
 
 <script src="/javascripts/jquery-2.1.0.min.js"></script>
 <script src="/javascripts/bootstrap.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/javascripts/Player.js"></script>
+<script src="/javascripts/Bomb.js"></script>
+
 <script>
     $(document).ready(function() {
 
         var socket;
         var localPlayer;
         var remotePlayers;
+        var bomb = null;
 
         var playerCanvas = document.getElementById("playerCanvas");
         var playerContext = playerCanvas.getContext("2d");
-
         playerCanvas.width = 480;
         playerCanvas.height = 320;
-
         playerContext.fillStyle = "#000000";
+
+
+        var bombCanvas = document.getElementById("bombCanvas");
+        var bombContext = bombCanvas.getContext("2d");
+        bombCanvas.width = 480;
+        bombCanvas.height = 320;
+        bombContext.fillStyle = "#ff0000";
 
         localPlayer = new Player(10, 10);
 
@@ -69,6 +79,10 @@
                             localPlayer.setY(localPlayer.getY() + 5);
                         }
                         break;
+                    case 32:
+                        bomb = new Bomb(localPlayer.getX(), localPlayer.getY(), 3);
+                        console.log("FUck it");
+                        break;
                 }
 
                 socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
@@ -111,8 +125,14 @@
 
         setInterval(function() {
             playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
+            //playerContext.fillStyle = "#000000";
             localPlayer.draw(playerContext);
+            if(bomb != null) {
+                //playerContext.fillStyle = "#ff0000";
+                bomb.draw(bombContext);
+            }
             for (var i = 0; i < remotePlayers.length; ++i) {
+                //playerContext.fillStyle = "#000000";
                 remotePlayers[i].draw(playerContext);
             }
         }, 1000 / 60);
