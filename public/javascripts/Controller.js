@@ -1,7 +1,6 @@
 var Controller = function() {
     window.onkeydown = function(e) {
         var key = e.keyCode ? e.keyCode : e.which;
-
         switch(key) {
             case 37:
                 if (!(0 > localPlayer.getX() - 5)) {
@@ -22,6 +21,7 @@ var Controller = function() {
                 if (!(playerCanvas.height < localPlayer.getY() + 5)) {
                     localPlayer.setX(localPlayer.getY() + 5);
                 }
+
                 break;
         }
     };

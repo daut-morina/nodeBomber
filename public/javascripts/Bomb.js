@@ -1,19 +1,22 @@
-var Player = function(initX, initY, initColor) {
+/**
+ * Created by fabiolaib on 10.04.14.
+ */
+var Bomb = function(initX, initY, initTimer) {
     var id;
+    var timer = initTimer;
     var x = initX;
     var y = initY;
-    var color = initColor;
+
+    var setTimer = function(time) {
+        timer = time;
+   }
 
     var setId = function(newId) {
         id = newId;
-    };
+    }
 
     var getId = function() {
         return id;
-    };
-
-    var getColor = function() {
-        return color;
     };
 
     var setX = function(newX) {
@@ -34,12 +37,13 @@ var Player = function(initX, initY, initColor) {
 
     var draw = function(context) {
         context.fillRect(x, y, 10, 10);
+
     };
 
     return {
+        setTimer: setTimer,
         setId:  setId,
         getId:  getId,
-        getColor: getColor,
         setX:   setX,
         getX:   getX,
         setY:   setY,
@@ -47,5 +51,3 @@ var Player = function(initX, initY, initColor) {
         draw:   draw
     };
 };
-
-exports.Player = Player;

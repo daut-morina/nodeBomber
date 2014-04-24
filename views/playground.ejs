@@ -7,31 +7,66 @@
 </head>
 <body>
 <canvas id="playerCanvas"></canvas>
+<canvas id="bombCanvas"></canvas>
+
+<!--
+<button id="left" class="btn btn-default">left</button>
+<button id="up" class="btn btn-default">up</button>
+<button id="right" class="btn btn-default">right</button>
+<button id="down" class="btn btn-default">down</button>
+-->
 
 <script src="/javascripts/jquery-2.1.0.min.js"></script>
 <script src="/javascripts/bootstrap.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/javascripts/Player.js"></script>
+<script src="/javascripts/Bomb.js"></script>
 <script src="/javascripts/Obstacle.js"></script>
 
 <script>
     $(document).ready(function() {
 
+        var helpers = {
+            getPlayerById: function(id) {
+                for (var i = 0; i < remotePlayers.length; ++i) {
+                    if (id == remotePlayers[i].getId()) {
+                        return remotePlayers[i];
+                    }
+                }
+
+                return false;
+            },
+
+            getRandomColor: function() {
+                var letters = '0123456789ABCDEF'.split('');
+                var color = '#';
+                for (var i = 0; i < 6; i++ ) {
+                    color += letters[Math.round(Math.random() * 15)];
+                }
+
+                return color;
+            }
+        };
+
         var socket;
         var localPlayer;
         var remotePlayers;
+        var bomb = null;
 
         var obstacles = new Array();
 
         var playerCanvas = document.getElementById("playerCanvas");
         var playerContext = playerCanvas.getContext("2d");
-
         playerCanvas.width = 480;
         playerCanvas.height = 320;
 
-        playerContext.fillStyle = "#000000";
 
-        localPlayer = new Player(10, 10);
+        var bombCanvas = document.getElementById("bombCanvas");
+        var bombContext = bombCanvas.getContext("2d");
+        bombCanvas.width = 480;
+        bombCanvas.height = 320;
+
+        localPlayer = new Player(10, 10, helpers.getRandomColor());
 
 /*
         for (var i=0; i < obstacles.length; i++)
@@ -47,17 +82,36 @@
 
         socket = io.connect(window.location.hostname);
 
-        var findPlayerById = function(id) {
-            for (var i = 0; i < remotePlayers.length; ++i) {
-                if (id == remotePlayers[i].getId()) {
-                    return remotePlayers[i];
-                }
-            }
-
-            return false;
-        };
-
         var setEventHandlers = function() {
+
+            $("#left").mousedown(function() {
+                if (!(0 > localPlayer.getX() - 5)) {
+                    localPlayer.setX(localPlayer.getX() - 5);
+                }
+                socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+            });
+
+            $("#up").mousedown(function() {
+                if (!(0 > localPlayer.getY() - 5)) {
+                    localPlayer.setY(localPlayer.getY() - 5);
+                }
+                socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+            });
+
+            $("#right").mousedown(function() {
+                if (!(playerCanvas.width - 10 < localPlayer.getX() + 5)) {
+                    localPlayer.setX(localPlayer.getX() + 5);
+                }
+                socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+            });
+
+            $("#down").mousedown(function() {
+                if (!(playerCanvas.height - 10 < localPlayer.getY() + 5)) {
+                    localPlayer.setY(localPlayer.getY() + 5);
+                }
+                socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+            });
+
             //@TODO: Use constants for player width (-10) and speed (+/- 5)
             window.onkeydown = function(e) {
                 var key = e.keyCode ? e.keyCode : e.which;
@@ -144,17 +198,20 @@
                             }
                         }
                         break;
+                    case 32:
+                        bomb = new Bomb(localPlayer.getX(), localPlayer.getY(), 3);
+                        break;
                 }
 
                 socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
             };
 
             socket.on("connect", function() {
-                socket.emit("new player", { x: localPlayer.getX(), y: localPlayer.getY() });
+                socket.emit("new player", { x: localPlayer.getX(), y: localPlayer.getY(), color: localPlayer.getColor() });
             });
 
             socket.on("disconnect", function(data) {
-                var removedPlayer = findPlayerById(data.id);
+                var removedPlayer = helpers.getPlayerById(data.id);
 
                 if (!removedPlayer) {
                     return;
@@ -164,14 +221,14 @@
             });
 
             socket.on("new player", function(data) {
-                var newPlayer = new Player(data.x, data.y);
+                var newPlayer = new Player(data.x, data.y, data.color);
                 newPlayer.setId(data.id);
 
                 remotePlayers.push(newPlayer);
             });
 
             socket.on("update player positions", function(data) {
-                var movedPlayer = findPlayerById(data.id);
+                var movedPlayer = helpers.getPlayerById(data.id);
 
                 if (!movedPlayer) {
                     return;
@@ -182,35 +239,51 @@
             });
         };
 
-        setEventHandlers();
-
         var doesCollide = function(position) {
 
 
             /*
-            console.log('x' + localPlayer.getX());
-            console.log('y' + localPlayer.getY());
-            console.log('aggx' + localPlayer.getAggregatedX());
-            console.log('aggy' + localPlayer.getAggregatedY());
-            */
+             console.log('x' + localPlayer.getX());
+             console.log('y' + localPlayer.getY());
+             console.log('aggx' + localPlayer.getAggregatedX());
+             console.log('aggy' + localPlayer.getAggregatedY());
+             */
 
             return false;
         };
 
-        //@TODO: create own canvas for obstacles (especially not destroyable ones)
-        setInterval(function() {
+        var animateGame = function() {
+            console.log("animating");
             playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
+
+            playerContext.fillStyle = "#000000";
             localPlayer.draw(playerContext);
 
-            //SMU
-            obstacles[0].draw(playerContext);
-            obstacles[1].draw(playerContext);
-            obstacles[2].draw(playerContext);
+            if (bomb != null) {
+                playerContext.fillStyle = "#ff0000";
+                bomb.draw(bombContext);
+            }
 
             for (var i = 0; i < remotePlayers.length; ++i) {
-                remotePlayers[i].draw(playerContext);
+                playerContext.fillStyle = localPlayer.getColor();
+                localPlayer.draw(playerContext);
+
+                //SMU
+                obstacles[0].draw(playerContext);
+                obstacles[1].draw(playerContext);
+                obstacles[2].draw(playerContext);
+
+                for (var i = 0; i < remotePlayers.length; ++i) {
+                    playerContext.fillStyle = remotePlayers[i].getColor();
+                    remotePlayers[i].draw(playerContext);
+                }
             }
-        }, 1000 / 60);
+            //@TODO: create own canvas for obstacles (especially not destroyable ones)
+            window.requestAnimationFrame(animateGame);
+        }
+
+        setEventHandlers();
+        animateGame();
 
     });
 </script>
