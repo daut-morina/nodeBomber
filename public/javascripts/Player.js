@@ -6,7 +6,7 @@ var Player = function(initX, initY, initColor) {
 
     var setId = function(newId) {
         id = newId;
-    }
+    };
 
     var getId = function() {
         return id;
@@ -14,7 +14,7 @@ var Player = function(initX, initY, initColor) {
 
     var getColor = function() {
         return color;
-    }
+    };
 
     var setX = function(newX) {
         x = newX;
