@@ -16,6 +16,8 @@
 <script src="/javascripts/bootstrap.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/javascripts/Player.js"></script>
+<script src="/javascripts/Obstacle.js"></script>
+
 <script>
     $(document).ready(function() {
 
@@ -45,6 +47,8 @@
         var localPlayer;
         var remotePlayers;
 
+        var obstacles = new Array();
+
         var playerCanvas = document.getElementById("playerCanvas");
         var playerContext = playerCanvas.getContext("2d");
 
@@ -52,6 +56,16 @@
         playerCanvas.height = 320;
 
         localPlayer = new Player(10, 10, helpers.getRandomColor());
+
+/*
+        for (var i=0; i < obstacles.length; i++)
+        {
+            obstacles[i] =
+        }
+        */
+        obstacles[0] = new Obstacle(100, 100);
+        obstacles[1] = new Obstacle(100, 140);
+        obstacles[2] = new Obstacle(300, 100);
 
         remotePlayers = [];
 
@@ -118,26 +132,87 @@
 
             window.onkeydown = function(e) {
                 var key = e.keyCode ? e.keyCode : e.which;
+                var allowedToMove = new Boolean(true);
 
                 switch(key) {
+                    //left
                     case 37:
                         if (!(0 > localPlayer.getX() - 5)) {
-                            localPlayer.setX(localPlayer.getX() - 5);
+                            // with different x-values, no collision is possible
+                            for (var i = 0; i < obstacles.length; ++i) {
+                                // compare left edge of player with right edge of obstacle
+                                if (localPlayer.getX() == obstacles[i].getX() + 20) {
+                                    if ((obstacles[i].getY() < localPlayer.getY() && obstacles[i].getY() + 20 > localPlayer.getY()) |
+                                            (obstacles[i].getY() < localPlayer.getY() + 10 && obstacles[i].getY() + 20 > localPlayer.getY() + 10)) {
+
+                                        allowedToMove = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (allowedToMove) {
+                                localPlayer.setX(localPlayer.getX() - 5);
+                            }
                         }
                         break;
+                    //up
                     case 38:
                         if (!(0 > localPlayer.getY() - 5)) {
-                            localPlayer.setY(localPlayer.getY() - 5);
+                            // with different y-values, no collision is possible
+                            for (var i = 0; i < obstacles.length; ++i) {
+                                // compare upper edge of player with bottom edge of obstacle
+                                if (localPlayer.getY() == obstacles[i].getY() + 20) {
+                                    if ((obstacles[i].getX() < localPlayer.getX() && obstacles[i].getX() + 20 > localPlayer.getX()) |
+                                            (obstacles[i].getX() < localPlayer.getX() + 10 && obstacles[i].getX() + 20 > localPlayer.getX() + 10)) {
+
+                                        allowedToMove = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (allowedToMove) {
+                                localPlayer.setY(localPlayer.getY() - 5);
+                            }
                         }
                         break;
+                    //right
                     case 39:
                         if (!(playerCanvas.width - 10 < localPlayer.getX() + 5)) {
-                            localPlayer.setX(localPlayer.getX() + 5);
+                            // with different x-values, no collision is possible
+                            for (var i = 0; i < obstacles.length; ++i) {
+                                // compare right edge of player with left edge of obstacle
+                                if (localPlayer.getX() + 10 == obstacles[i].getX()) {
+                                    if ((obstacles[i].getY() < localPlayer.getY() && obstacles[i].getY() + 20 > localPlayer.getY()) |
+                                            (obstacles[i].getY() < localPlayer.getY() + 10 && obstacles[i].getY() + 20 > localPlayer.getY() + 10)) {
+
+                                        allowedToMove = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (allowedToMove) {
+                                localPlayer.setX(localPlayer.getX() + 5);
+                            }
                         }
                         break;
+                    //down
                     case 40:
                         if (!(playerCanvas.height - 10 < localPlayer.getY() + 5)) {
-                            localPlayer.setY(localPlayer.getY() + 5);
+                            // with different y-values, no collision is possible
+                            for (var i = 0; i < obstacles.length; ++i) {
+                                // compare bottom edge of player with upper edge of obstacle
+                                if (localPlayer.getY() + 10 == obstacles[i].getY()) {
+                                    if ((obstacles[i].getX() < localPlayer.getX() && obstacles[i].getX() + 20 > localPlayer.getX()) |
+                                            (obstacles[i].getX() < localPlayer.getX() + 10 && obstacles[i].getX() + 20 > localPlayer.getX() + 10)) {
+
+                                        allowedToMove = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (allowedToMove) {
+                                localPlayer.setY(localPlayer.getY() + 5);
+                            }
                         }
                         break;
                 }
@@ -178,14 +253,35 @@
             });
         };
 
+        var doesCollide = function(position) {
+
+
+            /*
+             console.log('x' + localPlayer.getX());
+             console.log('y' + localPlayer.getY());
+             console.log('aggx' + localPlayer.getAggregatedX());
+             console.log('aggy' + localPlayer.getAggregatedY());
+             */
+
+            return false;
+        };
+
         var animateGame = function() {
             playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
             playerContext.fillStyle = localPlayer.getColor();
             localPlayer.draw(playerContext);
+
+            //SMU
+            obstacles[0].draw(playerContext);
+            obstacles[1].draw(playerContext);
+            obstacles[2].draw(playerContext);
+
             for (var i = 0; i < remotePlayers.length; ++i) {
                 playerContext.fillStyle = remotePlayers[i].getColor();
                 remotePlayers[i].draw(playerContext);
             }
+
+        //@TODO: create own canvas for obstacles (especially not destroyable ones)
             window.requestAnimationFrame(animateGame);
         }
 
