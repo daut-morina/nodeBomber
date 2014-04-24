@@ -24,8 +24,11 @@
     "scripts": {
         "test": "mocha -R spec",
         "blanket": {
-            "pattern": "test",
-            "data-cover-never": "node_modules"
+            "pattern": "",
+            "data-cover-never": [
+                "node_modules",
+                "test"
+            ]
         }
     },
     "main": "app.js",

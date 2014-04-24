@@ -6,39 +6,140 @@
         <link rel="stylesheet" href="/stylesheets/style.css" />
     </head>
     <body>
-        <button class="btn btn-primary">Bomb 'em!</button>
+        <div id="controllerContainer">
+            <div id="controller"></div>
+        </div>
 
         <script src="/javascripts/jquery-2.1.0.min.js"></script>
+        <script src="/javascripts/jquery-migrate-1.2.1.min.js"></script>
+        <script src="/javascripts/jquery-ui-1.10.4.min.js"></script>
+        <script src="/javascripts/jquery.ui.touch-punch.min.js"></script>
         <script src="/javascripts/bootstrap.min.js"></script>
         <script src="/socket.io/socket.io.js"></script>
+        <script src="/javascripts/Player.js"></script>
         <script>
-            var drawBomb = function() {
-                $('body').prepend(
-                        '<div class="alert alert-success alert-dismissable">' +
-                                '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' +
-                                '<strong>Yay!</strong> You\'re bomb has been dropped.' +
-                                '</div>'
-                )
-            }
-
             $("document").ready(function() {
-                $(".btn.btn-primary").click(function() {
-                    socket.emit('bomb drop', { date: 'dropping bomb' });
-                    console.log("Bomb dropped!");
-                    drawBomb();
+                var socket = io.connect(window.location.hostname);
+                var localPlayer;
+                var remotePlayers;
+
+                remotePlayers = [];
+
+                var helpers = {
+                    getPlayerById: function(id) {
+                        for (var i = 0; i < remotePlayers.length; ++i) {
+                            if (id == remotePlayers[i].getId()) {
+                                return remotePlayers[i];
+                            }
+                        }
+
+                        return false;
+                    },
+
+                    getRandomColor: function() {
+                        var letters = '0123456789ABCDEF'.split('');
+                        var color = '#';
+                        for (var i = 0; i < 6; i++ ) {
+                            color += letters[Math.round(Math.random() * 15)];
+                        }
+
+                        return color;
+                    },
+
+                    getLength: function(x, y) {
+                        return Math.abs(Math.round(Math.sqrt(Math.pow(x, 2) * Math.pow(y, 2))));
+                    }
+                };
+
+                localPlayer = new Player(10, 10, helpers.getRandomColor());
+
+                var setEventHandlers = function() {
+                    socket.on("connect", function() {
+                        socket.emit("new player", { x: localPlayer.getX(), y: localPlayer.getY(), color: localPlayer.getColor() });
+                    });
+
+                    socket.on("disconnect", function(data) {
+                        var removedPlayer = helpers.getPlayerById(data.id);
+
+                        if (!removedPlayer) {
+                            return;
+                        }
+
+                        remotePlayers.splice(remotePlayers.indexOf(removedPlayer), 1);
+                    });
+
+                    socket.on("new player", function(data) {
+                        var newPlayer = new Player(data.x, data.y, data.color);
+                        newPlayer.setId(data.id);
+
+                        remotePlayers.push(newPlayer);
+                    });
+
+                    socket.on("update player positions", function(data) {
+                        var movedPlayer = helpers.getPlayerById(data.id);
+
+                        if (!movedPlayer) {
+                            return;
+                        };
+
+                        movedPlayer.setX(data.x);
+                        movedPlayer.setY(data.y);
+                    });
+                };
+
+                $(function() {
+                    $("#controller").draggable({ containment: "#controllerContainer", scroll: false, revert: true });
+                    /*$('#controller').bind('touchend', function(event) {
+                        event.preventDefault();
+                        var top = $('#controller').offset().top;
+                        var left = $('#controller').offset().left;
+                        if (top < 125 && left < 125) {
+                            if (top < left) {
+                                console.log('up');
+                            } else {
+                                console.log('left');
+                            }
+                        }
+                    });*/
+                    setInterval(function() {
+                        //var offset = $("#controller").offset();
+
+                        var top = $('#controller').offset().top;
+                        var left = $('#controller').offset().left;
+
+                        if (helpers.getLength(left, top) > 50) {
+                            if (top < 125 && left < 125) {
+                                if (top < left) {
+                                    localPlayer.setY(localPlayer.getY() - 5);
+                                } else {
+                                    localPlayer.setX(localPlayer.getX() - 5);
+                                }
+                            } else if (top < 125 && left >= 125) {
+                                if (top < (250 - left)) {
+                                    localPlayer.setY(localPlayer.getY() - 5);
+                                } else {
+                                    localPlayer.setX(localPlayer.getX() + 5);
+                                }
+                            } else if (top >= 125 && left >= 125) {
+                                if ((250 - top) > (250 - left)) {
+                                    localPlayer.setX(localPlayer.getX() + 5);
+                                } else {
+                                    localPlayer.setY(localPlayer.getY() + 5);
+                                }
+                            } else if (top >= 125 && left < 125) {
+                                if ((250 - top) > left) {
+                                    localPlayer.setX(localPlayer.getX() - 5);
+                                } else {
+                                    localPlayer.setY(localPlayer.getY() + 5);
+                                }
+                            }
+                        }
+
+                        socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+                    }, 1000 / 30);
+
+                    setEventHandlers();
                 });
-            });
-
-            var socket = io.connect(window.location.hostname);
-            socket.on('news', function (data) {
-                console.log(data);
-                socket.emit('my other event', { my: 'data' });
-                console.log(socket.socket.transport);
-            });
-
-            socket.on('draw bomb', function() {
-                console.log('drawing bomb');
-                drawBomb();
             });
         </script>
     </body>

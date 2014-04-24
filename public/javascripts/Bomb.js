@@ -1,23 +1,21 @@
 /**
  * Created by fabiolaib on 10.04.14.
  */
-var Bomb = function(initX, initY, initTimer) {
+var Bomb = function(initX, initY) {
     var id;
-    var timer = initTimer;
     var x = initX;
     var y = initY;
-    var testFunction = null;
+    var detonate = false;
 
     var boom = function() {
-        console.log("boom!");
+        detonate = true;
     }
 
     var timer = setTimeout(boom, 3000);
 
-    var setTimer = function(time) {
-        timer = time;
-   }
-
+    var getDetonate = function() {
+        return detonate;
+    }
     var setId = function(newId) {
         id = newId;
     }
@@ -48,13 +46,14 @@ var Bomb = function(initX, initY, initTimer) {
     };
 
     return {
-        setTimer: setTimer,
-        setId:  setId,
-        getId:  getId,
-        setX:   setX,
-        getX:   getX,
-        setY:   setY,
-        getY:   getY,
-        draw:   draw
+        timer:       timer,
+        getDetonate: getDetonate,
+        setId:       setId,
+        getId:      getId,
+        setX:       setX,
+        getX:       getX,
+        setY:       setY,
+        getY:       getY,
+        draw:       draw
     };
 };

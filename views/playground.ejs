@@ -9,21 +9,52 @@
 <canvas id="playerCanvas"></canvas>
 <canvas id="bombCanvas"></canvas>
 
+<!--
+<button id="left" class="btn btn-default">left</button>
+<button id="up" class="btn btn-default">up</button>
+<button id="right" class="btn btn-default">right</button>
+<button id="down" class="btn btn-default">down</button>
+-->
 
 <script src="/javascripts/jquery-2.1.0.min.js"></script>
 <script src="/javascripts/bootstrap.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/javascripts/Player.js"></script>
 <script src="/javascripts/Bomb.js"></script>
+<script src="/javascripts/Obstacle.js"></script>
 
 <script>
     $(document).ready(function() {
+
+        var helpers = {
+            getPlayerById: function(id) {
+                for (var i = 0; i < remotePlayers.length; ++i) {
+                    if (id == remotePlayers[i].getId()) {
+                        return remotePlayers[i];
+                    }
+                }
+
+                return false;
+            },
+
+            getRandomColor: function() {
+                var letters = '0123456789ABCDEF'.split('');
+                var color = '#';
+                for (var i = 0; i < 6; i++ ) {
+                    color += letters[Math.round(Math.random() * 15)];
+                }
+
+                return color;
+            }
+        };
 
         var socket;
         var localPlayer;
         var remotePlayers;
         var localBombs;
         var bomb = null;
+
+        var obstacles = new Array();
 
         var playerCanvas = document.getElementById("playerCanvas");
         var playerContext = playerCanvas.getContext("2d");
@@ -32,59 +63,150 @@
         playerContext.fillStyle = "#000000";
 
 
+
         var bombCanvas = document.getElementById("bombCanvas");
         var bombContext = bombCanvas.getContext("2d");
         bombCanvas.width = 480;
         bombCanvas.height = 320;
         bombContext.fillStyle = "#ff0000";
 
-        localPlayer = new Player(10, 10);
+
+        localPlayer = new Player(10, 10, helpers.getRandomColor());
+
+/*
+        for (var i=0; i < obstacles.length; i++)
+        {
+            obstacles[i] =
+        }
+        */
+        obstacles[0] = new Obstacle(100, 100);
+        obstacles[1] = new Obstacle(100, 140);
+        obstacles[2] = new Obstacle(300, 100);
 
         remotePlayers = [];
         localBombs = [];
 
         socket = io.connect(window.location.hostname);
 
-        var findPlayerById = function(id) {
-            for (var i = 0; i < remotePlayers.length; ++i) {
-                if (id == remotePlayers[i].getId()) {
-                    return remotePlayers[i];
-                }
-            }
-
-            return false;
-        };
-
         var setEventHandlers = function() {
+
+            $("#left").mousedown(function() {
+                if (!(0 > localPlayer.getX() - 5)) {
+                    localPlayer.setX(localPlayer.getX() - 5);
+                }
+                socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+            });
+
+            $("#up").mousedown(function() {
+                if (!(0 > localPlayer.getY() - 5)) {
+                    localPlayer.setY(localPlayer.getY() - 5);
+                }
+                socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+            });
+
+            $("#right").mousedown(function() {
+                if (!(playerCanvas.width - 10 < localPlayer.getX() + 5)) {
+                    localPlayer.setX(localPlayer.getX() + 5);
+                }
+                socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+            });
+
+            $("#down").mousedown(function() {
+                if (!(playerCanvas.height - 10 < localPlayer.getY() + 5)) {
+                    localPlayer.setY(localPlayer.getY() + 5);
+                }
+                socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+            });
+
             //@TODO: Use constants for player width (-10) and speed (+/- 5)
             window.onkeydown = function(e) {
                 var key = e.keyCode ? e.keyCode : e.which;
+                var allowedToMove = new Boolean(true);
 
                 switch(key) {
+                    //left
                     case 37:
                         if (!(0 > localPlayer.getX() - 5)) {
-                            localPlayer.setX(localPlayer.getX() - 5);
+                            // with different x-values, no collision is possible
+                            for (var i = 0; i < obstacles.length; ++i) {
+                                // compare left edge of player with right edge of obstacle
+                                if (localPlayer.getX() == obstacles[i].getX() + 20) {
+                                    if ((obstacles[i].getY() < localPlayer.getY() && obstacles[i].getY() + 20 > localPlayer.getY()) |
+                                            (obstacles[i].getY() < localPlayer.getY() + 10 && obstacles[i].getY() + 20 > localPlayer.getY() + 10)) {
+
+                                        allowedToMove = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (allowedToMove) {
+                                localPlayer.setX(localPlayer.getX() - 5);
+                            }
                         }
                         break;
+                    //up
                     case 38:
                         if (!(0 > localPlayer.getY() - 5)) {
-                            localPlayer.setY(localPlayer.getY() - 5);
+                            // with different y-values, no collision is possible
+                            for (var i = 0; i < obstacles.length; ++i) {
+                                // compare upper edge of player with bottom edge of obstacle
+                                if (localPlayer.getY() == obstacles[i].getY() + 20) {
+                                    if ((obstacles[i].getX() < localPlayer.getX() && obstacles[i].getX() + 20 > localPlayer.getX()) |
+                                            (obstacles[i].getX() < localPlayer.getX() + 10 && obstacles[i].getX() + 20 > localPlayer.getX() + 10)) {
+
+                                        allowedToMove = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (allowedToMove) {
+                                localPlayer.setY(localPlayer.getY() - 5);
+                            }
                         }
                         break;
+                    //right
                     case 39:
                         if (!(playerCanvas.width - 10 < localPlayer.getX() + 5)) {
-                            localPlayer.setX(localPlayer.getX() + 5);
+                            // with different x-values, no collision is possible
+                            for (var i = 0; i < obstacles.length; ++i) {
+                                // compare right edge of player with left edge of obstacle
+                                if (localPlayer.getX() + 10 == obstacles[i].getX()) {
+                                    if ((obstacles[i].getY() < localPlayer.getY() && obstacles[i].getY() + 20 > localPlayer.getY()) |
+                                            (obstacles[i].getY() < localPlayer.getY() + 10 && obstacles[i].getY() + 20 > localPlayer.getY() + 10)) {
+
+                                        allowedToMove = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (allowedToMove) {
+                                localPlayer.setX(localPlayer.getX() + 5);
+                            }
                         }
                         break;
+                    //down
                     case 40:
                         if (!(playerCanvas.height - 10 < localPlayer.getY() + 5)) {
-                            localPlayer.setY(localPlayer.getY() + 5);
+                            // with different y-values, no collision is possible
+                            for (var i = 0; i < obstacles.length; ++i) {
+                                // compare bottom edge of player with upper edge of obstacle
+                                if (localPlayer.getY() + 10 == obstacles[i].getY()) {
+                                    if ((obstacles[i].getX() < localPlayer.getX() && obstacles[i].getX() + 20 > localPlayer.getX()) |
+                                            (obstacles[i].getX() < localPlayer.getX() + 10 && obstacles[i].getX() + 20 > localPlayer.getX() + 10)) {
+
+                                        allowedToMove = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (allowedToMove) {
+                                localPlayer.setY(localPlayer.getY() + 5);
+                            }
                         }
                         break;
                     case 32:
-                        bomb = new Bomb(localPlayer.getX(), localPlayer.getY(), 3);
+                        bomb = new Bomb(localPlayer.getX(), localPlayer.getY());
                         localBombs.push(bomb);
-                        console.log("FUck it");
                         break;
                 }
 
@@ -92,11 +214,11 @@
             };
 
             socket.on("connect", function() {
-                socket.emit("new player", { x: localPlayer.getX(), y: localPlayer.getY() });
+                socket.emit("new player", { x: localPlayer.getX(), y: localPlayer.getY(), color: localPlayer.getColor() });
             });
 
             socket.on("disconnect", function(data) {
-                var removedPlayer = findPlayerById(data.id);
+                var removedPlayer = helpers.getPlayerById(data.id);
 
                 if (!removedPlayer) {
                     return;
@@ -106,14 +228,14 @@
             });
 
             socket.on("new player", function(data) {
-                var newPlayer = new Player(data.x, data.y);
+                var newPlayer = new Player(data.x, data.y, data.color);
                 newPlayer.setId(data.id);
 
                 remotePlayers.push(newPlayer);
             });
 
             socket.on("update player positions", function(data) {
-                var movedPlayer = findPlayerById(data.id);
+                var movedPlayer = helpers.getPlayerById(data.id);
 
                 if (!movedPlayer) {
                     return;
@@ -124,18 +246,55 @@
             });
         };
 
-        setEventHandlers();
+        var doesCollide = function(position) {
 
-        setInterval(function() {
+
+            /*
+             console.log('x' + localPlayer.getX());
+             console.log('y' + localPlayer.getY());
+             console.log('aggx' + localPlayer.getAggregatedX());
+             console.log('aggy' + localPlayer.getAggregatedY());
+             */
+
+            return false;
+        };
+
+        var animateGame = function() {
             playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
+            bombContext.clearRect(0, 0, bombCanvas.width, bombCanvas.height);
+
             localPlayer.draw(playerContext);
-            if(bomb != null) {
-                bomb.draw(bombContext);
+
+            for (var j = 0; j < localBombs.length; j++) {
+
+                if (localBombs[j].getDetonate()) {
+                    localBombs.splice(j, 1);
+                } else {
+                    localBombs[j].draw(bombContext);
+                }
             }
+
             for (var i = 0; i < remotePlayers.length; ++i) {
                 remotePlayers[i].draw(playerContext);
+                playerContext.fillStyle = localPlayer.getColor();
+                localPlayer.draw(playerContext);
+
+                //SMU
+                obstacles[0].draw(playerContext);
+                obstacles[1].draw(playerContext);
+                obstacles[2].draw(playerContext);
+
+                for (var i = 0; i < remotePlayers.length; ++i) {
+                    playerContext.fillStyle = remotePlayers[i].getColor();
+                    remotePlayers[i].draw(playerContext);
+                }
             }
-        }, 1000 / 60);
+            //@TODO: create own canvas for obstacles (especially not destroyable ones)
+            window.requestAnimationFrame(animateGame);
+        }
+
+        setEventHandlers();
+        animateGame();
 
     });
 </script>
