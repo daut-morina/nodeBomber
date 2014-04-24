@@ -6,6 +6,13 @@ var Bomb = function(initX, initY, initTimer) {
     var timer = initTimer;
     var x = initX;
     var y = initY;
+    var testFunction = null;
+
+    var boom = function() {
+        console.log("boom!");
+    }
+
+    var timer = setTimeout(boom, 3000);
 
     var setTimer = function(time) {
         timer = time;

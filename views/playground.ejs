@@ -22,6 +22,7 @@
         var socket;
         var localPlayer;
         var remotePlayers;
+        var localBombs;
         var bomb = null;
 
         var playerCanvas = document.getElementById("playerCanvas");
@@ -40,6 +41,7 @@
         localPlayer = new Player(10, 10);
 
         remotePlayers = [];
+        localBombs = [];
 
         socket = io.connect(window.location.hostname);
 
@@ -81,6 +83,7 @@
                         break;
                     case 32:
                         bomb = new Bomb(localPlayer.getX(), localPlayer.getY(), 3);
+                        localBombs.push(bomb);
                         console.log("FUck it");
                         break;
                 }
@@ -125,14 +128,11 @@
 
         setInterval(function() {
             playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
-            //playerContext.fillStyle = "#000000";
             localPlayer.draw(playerContext);
             if(bomb != null) {
-                //playerContext.fillStyle = "#ff0000";
                 bomb.draw(bombContext);
             }
             for (var i = 0; i < remotePlayers.length; ++i) {
-                //playerContext.fillStyle = "#000000";
                 remotePlayers[i].draw(playerContext);
             }
         }, 1000 / 60);
