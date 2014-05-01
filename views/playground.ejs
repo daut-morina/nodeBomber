@@ -106,8 +106,6 @@
         var drawObstacles = function() {
             for (var i=0; i < obstacles.length; i++)
             {
-                console.log("destroyable: " + obstacles[i].isDestroyable());
-
                 if (!obstacles[i].isDestroyable()) {
                     obstacles[i].draw(obstacleContext);
                 } else {
