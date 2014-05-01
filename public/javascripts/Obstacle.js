@@ -2,9 +2,7 @@ var Obstacle = function(initX, initY, initIsDestroyable) {
     var id;
     var x = initX;
     var y = initY;
-    var isDestroyable = initIsDestroyable || false;
-
-    console.log("isDestroyable: " + isDestroyable);
+    var destroyable = initIsDestroyable || false;
 
     var setId = function(newId) {
         id = newId;
@@ -31,11 +29,11 @@ var Obstacle = function(initX, initY, initIsDestroyable) {
     };
 
     var setDestroyable = function(newIsDestroyable) {
-        isDestroyable = newIsDestroyable;
+        destroyable = newIsDestroyable;
     };
 
     var isDestroyable = function() {
-        return isDestroyable;
+        return destroyable;
     };
 
     var draw = function(context) {
