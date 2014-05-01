@@ -1,5 +1,4 @@
-
-function Item(initX,initY, size, initColor){
+function Item(initX, initY, size, initColor) {
     this.x = initX;
     this.y = initY;
     this.size = size;
@@ -60,5 +59,3 @@ function inherits(SubC, SuperC) {
 };
 
 //module.exports = Item;
-
-

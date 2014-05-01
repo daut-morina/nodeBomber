@@ -80,8 +80,7 @@
 
 
 function Bomb(initX, initY) {
-    console.log("bomb created");
-    Item.call(this, initX,initY, 10, "#ff0000");
+    Item.call(this, initX, initY, 20, "#ff0000");
     this.detonating = false;
     this.detonated = false;
 
@@ -104,10 +103,10 @@ Bomb.prototype = {
         }
     },
     drawExplosion: function(context) {
-        context.fillRect(this.x, this.x, 10, 60);
-        context.fillRect(this.x, this.y, 10, -50);
-        context.fillRect(this.x, this.y, 60, 10);
-        context.fillRect(this.x, this.y, -50, 10);
+        context.fillRect(this.x, this.x, 20, 60);
+        context.fillRect(this.x, this.y, 20, -50);
+        context.fillRect(this.x, this.y, 60, 20);
+        context.fillRect(this.x, this.y, -50, 20);
     }
 }
 inherits(Bomb, Item);
