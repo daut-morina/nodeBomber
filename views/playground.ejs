@@ -267,21 +267,22 @@
             localPlayer.draw(playerContext);
 
             for (var j = 0; j < localBombs.length; j++) {
-                console.log("Bomb" + j + ": " + localBombs[j].getExploded() + " / draw: " + localBombs[j].drawExplosion);
-                if (localBombs[j].getDetonate() && localBombs[j].getExploded()) {
-                    bombContext.clearRect(localBombs[j].getX(), localBombs[j].getY(), 10, 60);
+                //console.log("Bomb" + j + ": " + localBombs[j].getExploded() + " / draw: " + localBombs[j].drawExplosion);
+                var bomb = localBombs[j];
+                if (bomb.isDetonated()) {
+                    /*bombContext.clearRect(localBombs[j].getX(), localBombs[j].getY(), 10, 60);
                     bombContext.clearRect(localBombs[j].getX(), localBombs[j].getY(), 10, -50);
                     bombContext.clearRect(localBombs[j].getX(), localBombs[j].getY(), 60, 10);
-                    bombContext.clearRect(localBombs[j].getX(), localBombs[j].getY(), -50, 10);
+                    bombContext.clearRect(localBombs[j].getX(), localBombs[j].getY(), -50, 10);*/
                     localBombs.splice(j, 1);
                     //localBombs.pop();
                 } else {
-                    if (!localBombs[j].drawExplosion) {
+                    /*if (!localBombs[j].drawExplosion) {
                         localBombs[j].draw();
                     } else {
                         localBombs[j].explosion();
-                    }
-
+                    }*/
+                    bomb.draw();
                 }
             }
 
