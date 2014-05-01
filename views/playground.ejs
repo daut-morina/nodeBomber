@@ -53,8 +53,9 @@
         var remotePlayers;
         var localBombs;
         var bomb = null;
+        var timer;
 
-        var obstacles = new Array();
+        var obstacles = [];
 
         var playerCanvas = document.getElementById("playerCanvas");
         var playerContext = playerCanvas.getContext("2d");
@@ -205,7 +206,7 @@
                         }
                         break;
                     case 32:
-                        bomb = new Bomb(localPlayer.getX(), localPlayer.getY());
+                        bomb = new Bomb(localPlayer.getX(), localPlayer.getY(), bombContext);
                         localBombs.push(bomb);
                         break;
                 }
@@ -266,11 +267,21 @@
             localPlayer.draw(playerContext);
 
             for (var j = 0; j < localBombs.length; j++) {
-
-                if (localBombs[j].getDetonate()) {
+                console.log("Bomb" + j + ": " + localBombs[j].getExploded() + " / draw: " + localBombs[j].drawExplosion);
+                if (localBombs[j].getDetonate() && localBombs[j].getExploded()) {
+                    bombContext.clearRect(localBombs[j].getX(), localBombs[j].getY(), 10, 60);
+                    bombContext.clearRect(localBombs[j].getX(), localBombs[j].getY(), 10, -50);
+                    bombContext.clearRect(localBombs[j].getX(), localBombs[j].getY(), 60, 10);
+                    bombContext.clearRect(localBombs[j].getX(), localBombs[j].getY(), -50, 10);
                     localBombs.splice(j, 1);
+                    //localBombs.pop();
                 } else {
-                    localBombs[j].draw(bombContext);
+                    if (!localBombs[j].drawExplosion) {
+                        localBombs[j].draw();
+                    } else {
+                        localBombs[j].explosion();
+                    }
+
                 }
             }
 
