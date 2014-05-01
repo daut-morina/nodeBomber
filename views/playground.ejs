@@ -8,6 +8,8 @@
 <body>
 <canvas id="playerCanvas"></canvas>
 <canvas id="bombCanvas"></canvas>
+<canvas id="obstacleCanvas"></canvas>
+<canvas id="destroyableObstacleCanvas"></canvas>
 
 <!--
 <button id="left" class="btn btn-default">left</button>
@@ -57,26 +59,69 @@
 
         var playerCanvas = document.getElementById("playerCanvas");
         var playerContext = playerCanvas.getContext("2d");
-        playerCanvas.width = 480;
-        playerCanvas.height = 320;
+        playerCanvas.width = 460;
+        playerCanvas.height = 300;
 
 
         var bombCanvas = document.getElementById("bombCanvas");
         var bombContext = bombCanvas.getContext("2d");
-        bombCanvas.width = 480;
-        bombCanvas.height = 320;
+        bombCanvas.width = playerCanvas.width;
+        bombCanvas.height = playerCanvas.height;
 
-        localPlayer = new Player(10, 10, helpers.getRandomColor());
+        var obstacleCanvas = document.getElementById("obstacleCanvas");
+        var obstacleContext = obstacleCanvas.getContext("2d");
+        obstacleCanvas.width = playerCanvas.width;
+        obstacleCanvas.height = playerCanvas.height;
+
+        var destroyableObstacleCanvas = document.getElementById("destroyableObstacleCanvas");
+        var destroyableObstacleContext = destroyableObstacleCanvas.getContext("2d");
+        destroyableObstacleCanvas.width = playerCanvas.width;
+        destroyableObstacleCanvas.height = playerCanvas.height;
+
+        localPlayer = new Player(0, 0, helpers.getRandomColor());
+
+        var generateObstacles = function() {
+
+            var x = 20;
+            var y = 20;
+
+            for (var v=0; v < obstacleCanvas.height/20; v++)
+            {
+                for (var i=0; i < obstacleCanvas.width/20; i++)
+                {
+                    obstacles.push(new Obstacle(x, y, false));
+                    x += 40;
+                }
+                x = 20;
+                y += 40;
+            }
 
 /*
-        for (var i=0; i < obstacles.length; i++)
-        {
-            obstacles[i] =
-        }
-        */
-        obstacles[0] = new Obstacle(100, 100);
-        obstacles[1] = new Obstacle(100, 140);
-        obstacles[2] = new Obstacle(300, 100);
+            for (var i = 0; i < obstacles.length; ++i) {
+                console.log('bluob');
+            }
+          */
+            obstacles.push(new Obstacle(40, 40, true));
+            console.log("n of Obstacles: " + obstacles.length);
+
+
+
+        };
+
+        var drawObstacles = function() {
+            for (var i=0; i < obstacles.length; i++)
+            {
+                if (!obstacles[i].isDestroyable()) {
+                    obstacles[i].draw(obstacleContext);
+                } else {
+                    obstacles[i].draw(destroyableObstacleContext);
+                }
+            }
+        };
+
+
+        //@todo: beim game start ausführen
+        generateObstacles();
 
         remotePlayers = [];
 
@@ -125,8 +170,8 @@
                             for (var i = 0; i < obstacles.length; ++i) {
                                 // compare left edge of player with right edge of obstacle
                                 if (localPlayer.getX() == obstacles[i].getX() + 20) {
-                                    if ((obstacles[i].getY() < localPlayer.getY() && obstacles[i].getY() + 20 > localPlayer.getY()) |
-                                            (obstacles[i].getY() < localPlayer.getY() + 10 && obstacles[i].getY() + 20 > localPlayer.getY() + 10)) {
+                                    if ((obstacles[i].getY() <= localPlayer.getY() && obstacles[i].getY() + 20 > localPlayer.getY()) |
+                                            (obstacles[i].getY() < localPlayer.getY() + 20 && obstacles[i].getY() + 20 > localPlayer.getY() + 20)) {
 
                                         allowedToMove = false;
                                         break;
@@ -145,8 +190,8 @@
                             for (var i = 0; i < obstacles.length; ++i) {
                                 // compare upper edge of player with bottom edge of obstacle
                                 if (localPlayer.getY() == obstacles[i].getY() + 20) {
-                                    if ((obstacles[i].getX() < localPlayer.getX() && obstacles[i].getX() + 20 > localPlayer.getX()) |
-                                            (obstacles[i].getX() < localPlayer.getX() + 10 && obstacles[i].getX() + 20 > localPlayer.getX() + 10)) {
+                                    if ((obstacles[i].getX() <= localPlayer.getX() && obstacles[i].getX() + 20 > localPlayer.getX()) |
+                                            (obstacles[i].getX() < localPlayer.getX() + 20 && obstacles[i].getX() + 20 > localPlayer.getX() + 20)) {
 
                                         allowedToMove = false;
                                         break;
@@ -160,13 +205,13 @@
                         break;
                     //right
                     case 39:
-                        if (!(playerCanvas.width - 10 < localPlayer.getX() + 5)) {
+                        if (!(playerCanvas.width - 10 < localPlayer.getX() + 15)) {
                             // with different x-values, no collision is possible
                             for (var i = 0; i < obstacles.length; ++i) {
                                 // compare right edge of player with left edge of obstacle
-                                if (localPlayer.getX() + 10 == obstacles[i].getX()) {
-                                    if ((obstacles[i].getY() < localPlayer.getY() && obstacles[i].getY() + 20 > localPlayer.getY()) |
-                                            (obstacles[i].getY() < localPlayer.getY() + 10 && obstacles[i].getY() + 20 > localPlayer.getY() + 10)) {
+                                if (localPlayer.getX() + 20 == obstacles[i].getX()) {
+                                    if ((obstacles[i].getY() <= localPlayer.getY() && obstacles[i].getY() + 20 > localPlayer.getY()) |
+                                            (obstacles[i].getY() < localPlayer.getY() + 20 && obstacles[i].getY() + 20 > localPlayer.getY() + 20)) {
 
                                         allowedToMove = false;
                                         break;
@@ -180,13 +225,13 @@
                         break;
                     //down
                     case 40:
-                        if (!(playerCanvas.height - 10 < localPlayer.getY() + 5)) {
+                        if (!(playerCanvas.height - 10 < localPlayer.getY() + 15)) {
                             // with different y-values, no collision is possible
                             for (var i = 0; i < obstacles.length; ++i) {
                                 // compare bottom edge of player with upper edge of obstacle
-                                if (localPlayer.getY() + 10 == obstacles[i].getY()) {
-                                    if ((obstacles[i].getX() < localPlayer.getX() && obstacles[i].getX() + 20 > localPlayer.getX()) |
-                                            (obstacles[i].getX() < localPlayer.getX() + 10 && obstacles[i].getX() + 20 > localPlayer.getX() + 10)) {
+                                if (localPlayer.getY() + 20 == obstacles[i].getY()) {
+                                    if ((obstacles[i].getX() <= localPlayer.getX() && obstacles[i].getX() + 20 > localPlayer.getX()) |
+                                            (obstacles[i].getX() < localPlayer.getX() + 20 && obstacles[i].getX() + 20 > localPlayer.getX() + 20)) {
 
                                         allowedToMove = false;
                                         break;
@@ -239,21 +284,8 @@
             });
         };
 
-        var doesCollide = function(position) {
-
-
-            /*
-             console.log('x' + localPlayer.getX());
-             console.log('y' + localPlayer.getY());
-             console.log('aggx' + localPlayer.getAggregatedX());
-             console.log('aggy' + localPlayer.getAggregatedY());
-             */
-
-            return false;
-        };
 
         var animateGame = function() {
-            console.log("animating");
             playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
 
             playerContext.fillStyle = "#000000";
@@ -264,14 +296,16 @@
                 bomb.draw(bombContext);
             }
 
+            drawObstacles();
+
+            obstacleContext.fillStyle = "#606060";
+            destroyableObstacleContext.fillStyle = "#FF3399";
+
             for (var i = 0; i < remotePlayers.length; ++i) {
                 playerContext.fillStyle = localPlayer.getColor();
                 localPlayer.draw(playerContext);
 
-                //SMU
-                obstacles[0].draw(playerContext);
-                obstacles[1].draw(playerContext);
-                obstacles[2].draw(playerContext);
+
 
                 for (var i = 0; i < remotePlayers.length; ++i) {
                     playerContext.fillStyle = remotePlayers[i].getColor();

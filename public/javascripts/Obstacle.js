@@ -1,7 +1,10 @@
-var Obstacle = function(initX, initY) {
+var Obstacle = function(initX, initY, initIsDestroyable) {
     var id;
     var x = initX;
     var y = initY;
+    var isDestroyable = initIsDestroyable || false;
+
+    console.log("isDestroyable: " + isDestroyable);
 
     var setId = function(newId) {
         id = newId;
@@ -27,6 +30,14 @@ var Obstacle = function(initX, initY) {
         return y;
     };
 
+    var setDestroyable = function(newIsDestroyable) {
+        isDestroyable = newIsDestroyable;
+    };
+
+    var isDestroyable = function() {
+        return isDestroyable;
+    };
+
     var draw = function(context) {
         context.fillRect(x, y, 20, 20);
     };
@@ -38,6 +49,8 @@ var Obstacle = function(initX, initY) {
         getX:   getX,
         setY:   setY,
         getY:   getY,
+        setDestroyable: setDestroyable,
+        isDestroyable: isDestroyable,
         draw:   draw
     };
 };

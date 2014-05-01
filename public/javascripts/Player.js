@@ -33,7 +33,7 @@ var Player = function(initX, initY, initColor) {
     };
 
     var draw = function(context) {
-        context.fillRect(x, y, 10, 10);
+        context.fillRect(x, y, 20, 20);
     };
 
     return {
