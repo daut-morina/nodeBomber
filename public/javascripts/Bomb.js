@@ -81,30 +81,34 @@
 
 function Bomb(initX, initY) {
     console.log("bomb created");
-    Item.call(initX,initY, 10, "#ff0000");
+    Item.call(this, initX,initY, 10, "#ff0000");
     this.detonating = false;
     this.detonated = false;
-    this.timer = setTimeout(this.boom, 3000);
+
+    var self = this;
+    this.that = this;
+    setTimeout(function() {
+        self.detonating = true;
+            setTimeout(function() {
+                self.detonated = true;
+            }, 1000)
+        }, 3000);
 }
 
 Bomb.prototype = {
-    boom: function() {
-        this.detonated = true;
-        console.log("boooooom");
-    },
-    isDetonated: function() {
-        return this.detonated;
-    },
-    draw: function() {
-        if (!detonating) {
-            drawBomb();
+    drawBomb: function(context) {
+        if (!this.detonating) {
+            this.draw(context);
         } else {
-            drawExplosion();
+            this.drawExplosion(context);
         }
     },
-    drawBomb: function() {
-        context.fillRect(x, y, 10, 10);
+    drawExplosion: function(context) {
+        context.fillRect(this.x, this.x, 10, 60);
+        context.fillRect(this.x, this.y, 10, -50);
+        context.fillRect(this.x, this.y, 60, 10);
+        context.fillRect(this.x, this.y, -50, 10);
     }
 }
-//Bomb.prototype.timer = setTimeout(this.boom, 3000);
 inherits(Bomb, Item);
+

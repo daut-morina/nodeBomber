@@ -1,5 +1,6 @@
 function Player(initX, initY, initColor) {
 Item.call(this, initX, initY, 10, initColor);
+    console.log(this);
 }
 Player.prototype = {
     //todo: 10 durch Breite, Höhe des Players ersetzen
