@@ -29,7 +29,8 @@
                 "node_modules",
                 "test"
             ]
-        }
+        },
+        "postinstall": "./node_modules/bower/bin/bower install"
     },
     "main": "app.js",
     "repository": {
@@ -41,6 +42,7 @@
         "Bomberman"
     ],
     "dependencies": {
+        "bower":        "1.3.x",
         "ejs":          "1.0.x",
         "express":      "3.5.x",
         "sequelize":    "^1.7.0",

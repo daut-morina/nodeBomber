@@ -13,7 +13,7 @@ app.configure(function() {
     app.use(express.methodOverride());
     app.use(app.router);
     app.use(express.static(__dirname + '/public'));
-    app.use('/bower_components',  express.static(__dirname + '/bower_components'));
+    app.use('/bower_components', express.static(__dirname + '/bower_components'));
 });
 
 app.configure('development', function() {
@@ -37,22 +37,72 @@ app.get('/playground', routes.playground);
  **************************************************/
 
 var players;
+var bomberMen = [];
 
 var getPlayerById = function(id) {
-    for (var i = 0; i < players.length; ++i) {
-        if (id == players[i].getId()) {
-            return players[i];
+    for (var i = 0; i < bomberMen.length; ++i) {
+        if (id == bomberMen[i].id) {
+            return bomberMen[i];
         }
     }
 
     return false;
 };
 
+var getRandomColor = function() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.round(Math.random() * 15)];
+    }
+
+    return color;
+};
+
 var init = function() {
-    players = [];
+    players = {
+        first: {
+            id: 1,
+            player: null,
+            x: 0,
+            y: 0
+        },
+        second: {
+            id: 2,
+            player: null,
+            x: 600,
+            y: 0
+        },
+        third: {
+            id: 3,
+            player: null,
+            x: 0,
+            y: 500
+        },
+        fourth: {
+            id: 4,
+            player: null,
+            x: 600,
+            y: 500
+        }
+    };
 
     setEventHandlers();
 };
+
+var initPlayer = function(slot, socket) {
+    slot.player = new Player(slot.id, slot.x, slot.y, getRandomColor());
+    bomberMen.push(slot.player);
+    socket.emit("player", { id: slot.id, x: slot.player.x, y: slot.player.y, color: slot.player.color });
+    socket.broadcast.emit("new player", { id: slot.id, x: slot.player.x, y: slot.player.y, color: slot.player.color });
+
+    for (var i = 0; i < bomberMen.length; ++i) {
+        existingBomberMan = bomberMen[i];
+        if (existingBomberMan.id !== slot.id) {
+            socket.emit("new player", { id: existingBomberMan.id, x: existingBomberMan.x, y: existingBomberMan.y, color: existingBomberMan.color });
+        }
+    }
+}
 
 var setEventHandlers = function() {
     io.sockets.on("connection", onConnection);
@@ -60,6 +110,18 @@ var setEventHandlers = function() {
 
 var onConnection = function(socket) {
     console.log("### New player has connected: " +  socket.id + " ###");
+
+    if (players.first.player === null) {
+        initPlayer(players.first, socket);
+    } else if (players.second.player === null) {
+        initPlayer(players.second, socket);
+    } else if (players.third.player === null) {
+        initPlayer(players.third, socket);
+    } else if (players.fourth.player === null) {
+        initPlayer(players.fourth, socket);
+    } else {
+        //socket.disconnect();
+    }
 
     socket.on("disconnect", function() {
         var removedPlayer = getPlayerById(socket.id);
@@ -70,7 +132,7 @@ var onConnection = function(socket) {
 
         players.splice(players.indexOf(removedPlayer), 1);
 
-        this.broadcast.emit("disconnect", { id: removedPlayer.getId() });
+        //this.broadcast.emit("disconnect", { id: removedPlayer.getId() });
     });
 
     socket.on("new player", function(data) {
@@ -88,16 +150,20 @@ var onConnection = function(socket) {
     });
 
     socket.on("update player positions", function(data) {
-        var movedPlayer = getPlayerById(socket.id);
+        var movedPlayer = getPlayerById(data.id);
 
         if (!movedPlayer) {
             return;
         }
 
-        movedPlayer.setX(data.x);
-        movedPlayer.setY(data.y);
+        movedPlayer.x = data.x;
+        movedPlayer.y = data.y;
 
-        socket.broadcast.emit("update player positions", { id: movedPlayer.getId(), x: movedPlayer.getX(), y: movedPlayer.getY() });
+        socket.broadcast.emit("update player positions", { id: movedPlayer.id, x: movedPlayer.x, y: movedPlayer.y });
+    });
+
+    socket.on("new bomb", function(data) {
+        socket.broadcast.emit("new bomb", { x: data.x, y: data.y });
     });
 };
 
