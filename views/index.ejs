@@ -9,14 +9,17 @@
         <div id="controllerContainer">
             <div id="controller"></div>
         </div>
+        <div id="display">
 
-        <script src="/javascripts/jquery-2.1.0.min.js"></script>
-        <script src="/javascripts/jquery-migrate-1.2.1.min.js"></script>
-        <script src="/javascripts/jquery-ui-1.10.4.min.js"></script>
-        <script src="/javascripts/jquery.ui.touch-punch.min.js"></script>
-        <script src="/javascripts/bootstrap.min.js"></script>
+        </div>
+
+        <script src="/javascripts/libs/jquery-2.1.0.min.js"></script>
+        <script src="/javascripts/libs/jquery-migrate-1.2.1.min.js"></script>
+        <script src="/javascripts/libs/jquery-ui-1.10.4.min.js"></script>
+        <script src="/javascripts/libs/jquery.ui.touch-punch.min.js"></script>
+        <script src="/javascripts/libs/bootstrap.min.js"></script>
         <script src="/socket.io/socket.io.js"></script>
-        <script src="/javascripts/Player.js"></script>
+        <script src="/javascripts/models/Player.js"></script>
         <script>
             $("document").ready(function() {
                 var socket = io.connect(window.location.hostname);
@@ -55,7 +58,7 @@
 
                 var setEventHandlers = function() {
                     socket.on("connect", function() {
-                        socket.emit("new player", { x: localPlayer.getX(), y: localPlayer.getY(), color: localPlayer.getColor() });
+                        socket.emit("new player", { x: localPlayer.x, y: localPlayer.y, color: localPlayer.color });
                     });
 
                     socket.on("disconnect", function(data) {
@@ -110,32 +113,40 @@
                         if (helpers.getLength(left, top) > 50) {
                             if (top < 125 && left < 125) {
                                 if (top < left) {
-                                    localPlayer.setY(localPlayer.getY() - 5);
+                                    $('#display').html("<h1>up</h1>");
+                                    //localPlayer.y = localPlayer.y - 5;
                                 } else {
-                                    localPlayer.setX(localPlayer.getX() - 5);
+                                    $('#display').html("<h1>left</h1>");
+                                    //localPlayer.x = localPlayer.y - 5;
                                 }
                             } else if (top < 125 && left >= 125) {
                                 if (top < (250 - left)) {
-                                    localPlayer.setY(localPlayer.getY() - 5);
+                                    $('#display').html("<h1>up</h1>");
+                                    //localPlayer.y = localPlayer.y - 5;
                                 } else {
-                                    localPlayer.setX(localPlayer.getX() + 5);
+                                    $('#display').html("<h1>right</h1>");
+                                    //localPlayer.x = localPlayer.x + 5;
                                 }
                             } else if (top >= 125 && left >= 125) {
                                 if ((250 - top) > (250 - left)) {
-                                    localPlayer.setX(localPlayer.getX() + 5);
+                                    $('#display').html("<h1>right</h1>");
+                                    //localPlayer.x = localPlayer.x + 5;
                                 } else {
-                                    localPlayer.setY(localPlayer.getY() + 5);
+                                    $('#display').html("<h1>down</h1>");
+                                    //localPlayer.y = localPlayer.y + 5;
                                 }
                             } else if (top >= 125 && left < 125) {
                                 if ((250 - top) > left) {
-                                    localPlayer.setX(localPlayer.getX() - 5);
+                                    $('#display').html("<h1>left</h1>");
+                                    //localPlayer.x = localPlayer.x - 5;
                                 } else {
-                                    localPlayer.setY(localPlayer.getY() + 5);
+                                    $('#display').html("<h1>down</h1>");
+                                    //localPlayer.y = localPlayer.y + 5;
                                 }
                             }
                         }
 
-                        socket.emit("update player positions", { x: localPlayer.getX(), y: localPlayer.getY() });
+                        socket.emit("update player positions", { x: localPlayer.x, y: localPlayer.y });
                     }, 1000 / 30);
 
                     setEventHandlers();

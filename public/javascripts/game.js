@@ -24,7 +24,9 @@ define(['./config', 'models/Obstacle', 'models/Bomberman', 'models/Bomb'], funct
     var animateGame = function() {
         context.bomberManContext.clearRect(0, 0, canvas.bomberManCanvas.width, canvas.bomberManCanvas.height);
 
-        localBomberMan.draw(context.bomberManContext);
+        if (localBomberMan) {
+            localBomberMan.draw(context.bomberManContext);
+        }
 
         for (var i = 0; i < remoteBomberMen.length; ++i) {
             remoteBomberMen[i].draw(context.bomberManContext);
@@ -234,7 +236,7 @@ define(['./config', 'models/Obstacle', 'models/Bomberman', 'models/Bomb'], funct
                     }
                     break;
                 case 32:
-                    bomb = new Bomb(localBomberMan.x, localBomberMan.y, config.fieldSize, '#FF0000', obstacles, context.obstacleContext);
+                    bomb = new Bomb(localBomberMan.x, localBomberMan.y, config.fieldSize, '#FF0000', obstacles, context.obstacleContext, remoteBomberMen, localBomberMan);
                     bombs.push(bomb);
                     socket.emit("new bomb", bomb);
                     break;

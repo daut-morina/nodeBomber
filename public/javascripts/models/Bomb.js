@@ -1,6 +1,8 @@
 define(['models/Item'], function(Item) {
-    function Bomb(x, y, size, color, obstacles, context) {
+    function Bomb(x, y, size, color, obstacles, context, remoteBomberMen, localBomberMan) {
         Item.call(this, x, y, size, color);
+        this.remoteBomberMen = remoteBomberMen;
+        this.localBomberMan = localBomberMan;
         this.obstacles = obstacles;
         this.detonating = false;
         this.detonated = false;
@@ -8,8 +10,6 @@ define(['models/Item'], function(Item) {
         var self = this;
 
         setTimeout(function() {
-            var obstacle;
-
             for (var i = 0; i < self.obstacles.length; ++i) {  // Bomb (0, 50), Obstacle (0, 100)
                 obstacle = self.obstacles[i];
                 if (obstacle.destroyable
