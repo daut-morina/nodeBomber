@@ -13,7 +13,7 @@ require.config({
     }
 });
 
-define(['socketio', 'Game'], function(io, Game) {
+define(['socketio', 'game'], function(io, Game) {
 
     var socket = io.connect(window.location.hostname);
 
