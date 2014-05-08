@@ -248,4 +248,3 @@ define(['./config', 'models/Obstacle', 'models/Bomberman', 'models/Bomb'], funct
 
     return Game;
 });
-
