@@ -1,4 +1,4 @@
-define(['./config', 'models/Obstacle', 'models/Bomberman', 'models/Bomb'], function(config, Obstacle, BomberMan, Bomb) {
+define(['./config', 'models/Obstacle', 'models/BomberMan', 'models/Bomb'], function(config, Obstacle, BomberMan, Bomb) {
     var socket;
 
     var obstacles = [];
