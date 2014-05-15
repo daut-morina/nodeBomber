@@ -40,8 +40,10 @@ define(['models/Item'], function(Item) {
     Bomb.prototype.drawBomb = function(context) {
         if (!this.detonating) {
             this.draw(context);
+            this.obstacles.push(this);
         } else {
             this.drawExplosion(context);
+
         }
     };
 
