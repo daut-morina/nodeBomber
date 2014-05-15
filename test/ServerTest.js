@@ -32,7 +32,7 @@ describe('Server', function() {
             assert.equal(200, response.statusCode, "Should return 200, returned " + response.statusCode + " instead.");
             response.setEncoding('utf8');
             response.on('data', function(body) {
-                assert.include(body, "playerCanvas", "not returning html");
+                assert.include(body, "obstacleCanvas", "not returning html");
             });
         }).on('error', function(error) {
             console.log("Got error: " + error.message);
