@@ -40,10 +40,10 @@ define(['models/Item'], function(Item) {
     Bomb.prototype.drawBomb = function(context) {
         if (!this.detonating) {
             this.draw(context);
-            this.obstacles.push(this);
+            //this.obstacles.push(this);
         } else {
             this.drawExplosion(context);
-
+            //Remove of the bomb in the obstacle array
         }
     };
 
@@ -68,7 +68,7 @@ define(['models/Item'], function(Item) {
             }
             //SOUTH Check
             //check if there is one obstacle with x/y position south the bomb
-            if (this.obstacles[k].x > (this.x - this.size) && this.obstacles[k].x < (this.x + this.size) && this.obstacles[k].y == (this.y - this.size) ){
+            if (this.obstacles[k].x > (this.x - this.size) && this.obstacles[k].x < (this.x + this.size) && this.obstacles[k].y == (this.y + this.size) ){
                 south = false;
             }
             //WEST Check
