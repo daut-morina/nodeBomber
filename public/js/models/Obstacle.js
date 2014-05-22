@@ -1,6 +1,7 @@
 define(['models/Item'], function(Item) {
-    function Obstacle(x, y, size, color, destroyable) {
-        Item.call(this, x, y, size, color);
+    function Obstacle(id, x, y, size, socket, destroyable) {
+        Item.call(this, id, x, y, size, socket);
+
         this.destroyable = destroyable || false;
     }
 

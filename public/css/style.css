@@ -29,3 +29,13 @@ div#controller {
     background: #880000;
     border-radius: 75px;
 }
+
+div#button {
+    background: #880000;
+    border-radius: 75px;
+    position: absolute;
+    height: 150px;
+    right: 10%;
+    top: 175px;
+    width: 150px;
+}

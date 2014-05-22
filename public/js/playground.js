@@ -13,9 +13,8 @@ require.config({
     }
 });
 
-define(['socketio', 'game'], function(io, Game) {
+define(['socketio', 'ViewHandler'], function(io, ViewHandler) {
+    var socket = io.connect(window.location.hostname + "/playground");
 
-    var socket = io.connect(window.location.hostname);
-
-    new Game(socket);
+    new ViewHandler(socket);
 });

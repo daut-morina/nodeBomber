@@ -3,5 +3,5 @@ exports.index = function(req, res) {
 };
 
 exports.playground = function(req, res) {
-    res.render('playground', { title: 'nodeBomber Playground'});
-}
+    res.render('playground', { title: 'nodeBomber Playground' });
+};

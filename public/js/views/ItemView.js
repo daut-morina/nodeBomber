@@ -1,10 +1,10 @@
 define(function() {
-    function Item(x, y, size, color) {
+    function Item(id, x, y, size, color) {
         this.x = x;
         this.y = y;
         this.size = size;
         this.color = color;
-        this.id = null;
+        this.id = id || 0;
     }
 
     Item.prototype.draw = function(context) {

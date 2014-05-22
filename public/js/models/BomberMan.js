@@ -1,6 +1,6 @@
 define(['models/Item'], function(Item) {
-    function BomberMan(x, y, size, color) {
-        Item.call(this, x, y, size, color);
+    function BomberMan(id, x, y, size, socket) {
+        Item.call(this, id, x, y, size, socket);
     }
 
     BomberMan.prototype = new Item();
