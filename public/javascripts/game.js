@@ -24,9 +24,29 @@ define(['./config', 'models/Obstacle', 'models/Bomberman', 'models/Bomb'], funct
     var animateGame = function() {
         context.bomberManContext.clearRect(0, 0, canvas.bomberManCanvas.width, canvas.bomberManCanvas.height);
 
-        if (localBomberMan) {
-            localBomberMan.draw(context.bomberManContext);
-        }
+        localBomberMan.draw(context.bomberManContext);
+        /*Game.prototype.loadKeyListeners = function() {
+            window.onkeydown = function(e) {
+                var key = e.keyCode ? e.keyCode : e.which;
+                switch (key) {
+                    case 38:
+                        localBomberMan.drawNorth(context.bomberManContext);
+                        console.log("TEST");
+                        break;
+                    case 37:
+                        console.log("shit");
+                        localBomberMan.drawWest(context.bomberManContext);
+                        break;
+                    case 39:
+                        localBomberMan.drawEast(context.bomberManContext);
+                        break;
+                    case 40:
+                        localBomberMan.drawSouth(context.bomberManContext);
+                        break;
+                }
+            };
+        }*/
+
 
         for (var i = 0; i < remoteBomberMen.length; ++i) {
             remoteBomberMen[i].draw(context.bomberManContext);
@@ -131,6 +151,8 @@ define(['./config', 'models/Obstacle', 'models/Bomberman', 'models/Bomb'], funct
             var newBomberMan = new BomberMan(data.x, data.y, config.fieldSize, data.color);
             newBomberMan.id = data.id;
 
+            console.log(newBomberMan);
+
             remoteBomberMen.push(newBomberMan);
         });
 
@@ -154,7 +176,6 @@ define(['./config', 'models/Obstacle', 'models/Bomberman', 'models/Bomb'], funct
         window.onkeydown = function(e) {
             var key = e.keyCode ? e.keyCode : e.which;
             var allowedToMove = true;
-
             switch(key) {
                 case 37: //left
                     if (!(0 > localBomberMan.x - 5)) {
@@ -163,7 +184,8 @@ define(['./config', 'models/Obstacle', 'models/Bomberman', 'models/Bomb'], funct
                             // compare left edge of player with right edge of obstacle
                             if (localBomberMan.x == obstacles[i].x + config.fieldSize) {
                                 if ((obstacles[i].y <= localBomberMan.y && obstacles[i].y + config.fieldSize > localBomberMan.y) |
-                                    (obstacles[i].y < localBomberMan.y + config.fieldSize && obstacles[i].y + config.fieldSize > localBomberMan.y + config.fieldSize)) {
+                                    (obstacles[i].y < localBomberMan.y + config.fieldSize && obstacles[i].y + config.fieldSize >
+                                        localBomberMan.y + config.fieldSize)) {
 
                                     allowedToMove = false;
                                     break;
@@ -172,6 +194,8 @@ define(['./config', 'models/Obstacle', 'models/Bomberman', 'models/Bomb'], funct
                         }
                         if (allowedToMove) {
                             localBomberMan.x = localBomberMan.x - 5;
+                            localBomberMan.direction = 'l';
+
                         }
                     }
                     break;
@@ -183,7 +207,8 @@ define(['./config', 'models/Obstacle', 'models/Bomberman', 'models/Bomb'], funct
                             // compare upper edge of player with bottom edge of obstacle
                             if (localBomberMan.y == obstacles[i].y + config.fieldSize) {
                                 if ((obstacles[i].x <= localBomberMan.x && obstacles[i].x + config.fieldSize > localBomberMan.x) |
-                                    (obstacles[i].x < localBomberMan.x + config.fieldSize && obstacles[i].x + config.fieldSize > localBomberMan.x + config.fieldSize)) {
+                                    (obstacles[i].x < localBomberMan.x + config.fieldSize && obstacles[i].x + config.fieldSize >
+                                        localBomberMan.x + config.fieldSize)) {
 
                                     allowedToMove = false;
                                     break;
@@ -192,6 +217,7 @@ define(['./config', 'models/Obstacle', 'models/Bomberman', 'models/Bomb'], funct
                         }
                         if (allowedToMove) {
                             localBomberMan.y = localBomberMan.y - 5;
+                            localBomberMan.direction = 'u';
                         }
                     }
                     break;
@@ -212,6 +238,8 @@ define(['./config', 'models/Obstacle', 'models/Bomberman', 'models/Bomb'], funct
                         }
                         if (allowedToMove) {
                             localBomberMan.x = localBomberMan.x + 5;
+                            localBomberMan.direction = 'r';
+
                         }
                     }
                     break;
@@ -232,6 +260,8 @@ define(['./config', 'models/Obstacle', 'models/Bomberman', 'models/Bomb'], funct
                         }
                         if (allowedToMove) {
                             localBomberMan.y = localBomberMan.y + 5;
+                            localBomberMan.direction = 'd';
+
                         }
                     }
                     break;
@@ -240,6 +270,28 @@ define(['./config', 'models/Obstacle', 'models/Bomberman', 'models/Bomb'], funct
                     bombs.push(bomb);
                     socket.emit("new bomb", bomb);
                     break;
+            }
+
+            window.onkeyup = function(e) {
+                var key = e.keyCode ? e.keyCode : e.which;
+
+                switch(key) {
+                    case 37: //left
+                        localBomberMan.direction = 0;
+                        break;
+                    //up
+                    case 38:
+                        localBomberMan.direction = 0;
+                        break;
+                    //right
+                    case 39:
+                        localBomberMan.direction = 0;
+                        break;
+                    //down
+                    case 40:
+                        localBomberMan.direction = 0;
+                        break;
+                }
             }
 
             socket.emit("update player positions", { id: localBomberMan.id, x: localBomberMan.x, y: localBomberMan.y });

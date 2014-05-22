@@ -58,7 +58,8 @@ define(['models/Item'], function(Item) {
             //if(!this.y <= this.obstacles[k].y) {
             //NORTH Check
             //check if there is one obstacle with x/y position north the bomb
-            if (this.obstacles[k].x < (this.x + this.size) && this.obstacles[k].x > (this.x - this.size) && this.obstacles[k].y == (this.y + this.size) ){
+            if (this.obstacles[k].x < (this.x + this.size) && this.obstacles[k].x > (this.x - this.size) &&
+                this.obstacles[k].y == (this.y - this.size) ){
                 north = false;
             }
             //EAST Check
