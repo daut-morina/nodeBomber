@@ -9,6 +9,12 @@ define(['models/Item'], function(Item) {
         this.level = 1;
         var self = this;
 
+        imageObj = new Image();
+        imageObj.src = 'images/www.png';
+
+        imageObj2 = new Image();
+        imageObj2.src = 'images/cb.png';
+
         setTimeout(function() {
             for (var i = 0; i < self.obstacles.length; ++i) {  // Bomb (0, 50), Obstacle (0, 100)
                 obstacle = self.obstacles[i];
@@ -36,10 +42,14 @@ define(['models/Item'], function(Item) {
     }
 
     Bomb.prototype = new Item();
+    Bomb.prototype.draw = function(context) {
+        context.drawImage(imageObj2, 0, 0, 45, 45, this.x, this.y, 45, 45);
+    }
 
     Bomb.prototype.drawBomb = function(context) {
         if (!this.detonating) {
             this.draw(context);
+
             //this.obstacles.push(this);
         } else {
             this.drawExplosion(context);
@@ -80,19 +90,31 @@ define(['models/Item'], function(Item) {
         }
         //North drawing
         if(north) {
-            context.fillRect(this.x, this.y - (this.level * this.size), this.size, (2 * this.level) * this.size);
+            //context.fillRect(this.x, this.y - (this.level * this.size), this.size, (2 * this.level) * this.size);
+            context.drawImage(imageObj, 0, 0, 45, 45, this.x, this.y - this.size, 45, 45);
+            context.drawImage(imageObj, 0, 0, 45, 45, this.x, this.y, 45, 45);
+
             north = true;
         }
         if(east) {
-            context.fillRect(this.x, this.y, (2 * this.level) * this.size, this.size);
+            //context.fillRect(this.x, this.y, (2 * this.level) * this.size, this.size);
+            context.drawImage(imageObj, 0, 0, 45, 45, this.x + this.size, this.y, 45, 45);
+            context.drawImage(imageObj, 0, 0, 45, 45, this.x, this.y, 45, 45);
+
             east = true;
         }
         if(south) {
-            context.fillRect(this.x, this.y, this.size, 2 * this.size);
+            //context.fillRect(this.x, this.y, this.size, 2 * this.size);
+            context.drawImage(imageObj, 0, 0, 45, 45, this.x, this.y + this.size, 45, 45);
+            context.drawImage(imageObj, 0, 0, 45, 45, this.x, this.y, 45, 45);
+
             south = true;
         }
         if(west) {
-            context.fillRect(this.x, this.y, -(this.level) * this.size, this.size);
+            //context.fillRect(this.x, this.y, -(this.level) * this.size, this.size);
+            context.drawImage(imageObj, 0, 0, 45, 45, this.x - this.size, this.y, 45, 45);
+            context.drawImage(imageObj, 0, 0, 45, 45, this.x, this.y, 45, 45);
+
             west = true;
         }
 
